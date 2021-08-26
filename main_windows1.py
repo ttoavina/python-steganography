@@ -9,12 +9,14 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMainWindow,QMessageBox
 from PIL import Image,ImageQt
+from hidder import *
 
-class Ui_Steganographie(object):
+class Ui_Steganographie(QMainWindow):
 
     def __init__(self):
+        QMainWindow.__init__(self)
         self.image_name = "Aucune fichier selectionnée!"
         
 
@@ -28,15 +30,24 @@ class Ui_Steganographie(object):
             print(filenames[0])
             self.file_name_label.setText(filenames[0])
 
-        im = Image.open(filenames[0])
-        QtIm = ImageQt.ImageQt(im)
+        self.im = Image.open(filenames[0])
+        self.output = "new_"+filenames[0].split("/")[-1]
+        QtIm = ImageQt.ImageQt(self.im)
         QtIm = QtGui.QImage(QtIm)
         pix = QtGui.QPixmap.fromImage(QtIm)
         pix = pix.scaled(250,250,QtCore.Qt.KeepAspectRatio)
         self.image_container.setPixmap(pix)
+        print(f"output is {self.output}")
 
-    def get_input(self):
-        print(self.text_container.toPlainText())
+    def hide(self):
+        new_im = encode(self.text_container.toPlainText(),self.im)
+        new_im.save(self.output)
+        QMessageBox.about(self,'Title',f"Message cachée dans {self.output}")
+
+    def show(self):
+        QMessageBox.about(self ,"Contenue cachée",decode(self.im))
+
+    
 
     def setupUi(self, Steganographie):
         Steganographie.setObjectName("Steganographie")
@@ -51,14 +62,18 @@ class Ui_Steganographie(object):
         self.hide_text = QtWidgets.QPushButton(Steganographie)
         self.hide_text.setGeometry(QtCore.QRect(10, 480, 121, 31))
         self.hide_text.setObjectName("hide_text")
-        self.hide_text.clicked.connect(self.get_input)
+        self.hide_text.clicked.connect(self.hide)
 
         self.text_container = QtWidgets.QTextEdit(Steganographie)
         self.text_container.setGeometry(QtCore.QRect(10, 310, 261, 161))
         self.text_container.setObjectName("text_container")
+
+
         self.show_text = QtWidgets.QPushButton(Steganographie)
         self.show_text.setGeometry(QtCore.QRect(150, 480, 121, 31))
         self.show_text.setObjectName("show_text")
+        self.show_text.clicked.connect(self.show)
+
         self.widget = QtWidgets.QWidget(Steganographie)
         self.widget.setGeometry(QtCore.QRect(12, 12, 261, 25))
         self.widget.setObjectName("widget")

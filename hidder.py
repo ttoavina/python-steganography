@@ -1,33 +1,56 @@
 from PIL import Image
 
+def bin_to_text(tab):
+    return ''.join(chr(int(x,2)) for x in tab)
 
 def decode(image):
-    data = image.getdata()
+    pixels = image.load()
     bin_data = []
     current_string = ""
-    for pixels in data:
-        for pixel in pixels:
-            if pixel%2 == 0:
-                current_string +="0"
-            else:
-                current_string +="1"
-
-            if len(current_string)==8:
-                #print(current_string)
-                bin_data.append(current_string)
-                current_string = ""
-    return bin_data
+    iteration = 0
+    length = 0
+    length_string = ""
+    
+    for i in range(image.size[0]):
+        for j in range(image.size[1]):
+            for p in range(len(pixels[i,j])):
+                if iteration<16:
+                    if pixels[i,j][p]%2==0:
+                        length_string += "0"
+                    else:
+                        length_string += "1"
+                    
+                elif pixels[i,j][p]%2==0:
+                    current_string += "0"
+                else:
+                    current_string += "1"
+                    
+                if len(current_string) == 8:
+                    bin_data.append(current_string)
+                    current_string = ""
+                iteration +=1
+                
+                if len(length_string)==16:
+                    length = int(length_string,2) +16
+                    
+                
+                
+                if iteration == length:
+                    print(f"length:{length} and iteration: {iteration}")
+                    return bin_to_text(bin_data)
+    
 
 def encode(text,image):
-    #image.show()
-    #for im in image.getdata():
-        #print(im)
-
+    
     pixels = image.load()
-    text = ''.join(format(x,'b') for x in bytes(text,"ascii"))
-    print(text)
+    
+    text = ''.join(format(x,'08b') for x in bytes(text,"ascii"))
+    print(f"text len is {len(text)}")
+    length = len(text)
+    length = format(length,'016b')
     iteration = 0
-
+    text = length+text
+    
     for i in range(image.size[0]):
         for j in range(image.size[1]):
             
@@ -50,23 +73,9 @@ def encode(text,image):
                         tmp[k]+=1
                         
                 iteration +=1
-
-
-            pixel = tuple(tmp)
-            image.putpixel((i,j),pixel)
-            print(f"pixel : {pixels[i,j]}")
+                
+            image.putpixel((i,j),tuple(tmp))
     
-
+            
                         
 
-
-
-if __name__ == "__main__":
-    img = Image.open("C:/Users/Toavina/Pictures/Crypto/icon.PNG")
-    
-    img = encode("test_data",img)
-
-    #New pixel
-    for pixel in img.getdata():
-        print(pixel)
-    
