@@ -32,20 +32,41 @@ class Ui_Steganographie(QMainWindow):
 
         self.im = Image.open(filenames[0])
         self.output = "new_"+filenames[0].split("/")[-1]
-        QtIm = ImageQt.ImageQt(self.im)
+        QtIm = ImageQt.ImageQt(self.im).copy()
         QtIm = QtGui.QImage(QtIm)
         pix = QtGui.QPixmap.fromImage(QtIm)
-        pix = pix.scaled(250,250,QtCore.Qt.KeepAspectRatio)
         self.image_container.setPixmap(pix)
         print(f"output is {self.output}")
 
+
+    def reset(self):
+        self.file_name_label.setText("Aucune fichier selectionnée!")
+        self.image_container.clear()
+        self.image_container.setText("(Vide)")
+        self.text_container.clear()
+        self.im = None
+
+
     def hide(self):
-        new_im = encode(self.text_container.toPlainText(),self.im)
-        new_im.save(self.output)
-        QMessageBox.about(self,'Title',f"Message cachée dans {self.output}")
+        try:
+            new_im = encode(self.text_container.toPlainText(),self.im)
+            new_im.save(self.output)
+            QMessageBox.about(self,'Title',f"Message cachée dans {self.output}")
+            self.reset()    
+        except Exception as e:
+            QMessageBox.about(self,'Erreur',f"Champ manquant")
+
+        
 
     def show(self):
-        QMessageBox.about(self ,"Contenue cachée",decode(self.im))
+        try:
+            QMessageBox.about(self ,"Contenue cachée",decode(self.im))
+        except Exception as e:
+            QMessageBox.about(self,'Erreur',f"Champ manquant")
+
+        self.reset()
+
+        
 
     
 
@@ -95,8 +116,8 @@ class Ui_Steganographie(QMainWindow):
 
     def retranslateUi(self, Steganographie):
         _translate = QtCore.QCoreApplication.translate
-        Steganographie.setWindowTitle(_translate("Steganographie", "Dialog"))
-        self.image_container.setText(_translate("Steganographie", "Image"))
+        Steganographie.setWindowTitle(_translate("Steganographie", "Steganography by Toavina"))
+        self.image_container.setText(_translate("Steganographie", "(Vide)"))
         self.hide_text.setText(_translate("Steganographie", "Cacher dans l\'image"))
         self.show_text.setText(_translate("Steganographie", "Extraire le texte"))
         self.file_name_label.setText(_translate("Steganographie", self.image_name))
@@ -110,4 +131,5 @@ if __name__ == "__main__":
     ui = Ui_Steganographie()
     ui.setupUi(Steganographie)
     Steganographie.show()
+    app.processEvents()
     sys.exit(app.exec_())
