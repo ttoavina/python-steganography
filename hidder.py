@@ -44,12 +44,15 @@ def decode(image,key=""):
                     current_string = decrypter(current_string,key)
                     return current_string[:len(current_string)-1]
     
+def image_print(image):
+    for i in image.getdata():
+        print(i)
+
 
 def encode(text,image,key=""):
-    
     pixels = image.load()
     text = text + "x"
-    text = ''.join(format(x,'08b') for x in bytes(text,"ascii"))
+    text = ''.join(format(x,'08b') for x in bytes(text,"ansi"))
     print(f"text len is {len(text)}")
     text = encrypter(text,key)
     print(f"text len is {len(text)}")

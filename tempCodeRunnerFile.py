@@ -1,0 +1,5 @@
+msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setWindowTitle("Notice")
+            msgBox.setText(f"Cette image peut contenir jusqu'à {self.sizeMax()} caractère!")
+            msgBox.exec()
