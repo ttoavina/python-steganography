@@ -20,6 +20,13 @@ class Ui_Steganographie(QMainWindow):
         self.image_name = "Aucune fichier selectionnée!"
 
 
+    def sizeMax(self):
+        s = 1
+        for x in self.im.size:
+            s *= x
+
+        return s//8
+
 
     def load(self):
         try:
@@ -32,15 +39,29 @@ class Ui_Steganographie(QMainWindow):
                 print(filenames[0])
                 self.file_name_label.setText(filenames[0])
 
-            self.im = Image.open(filenames[0])
-            self.output = "new_"+filenames[0].split("/")[-1]
+            self.im = Image.open(filenames[0]).convert("RGBA")
+            self.output = "new_"+filenames[0].split("/")[-1].split(".")[0] + ".png"
+
             QtIm = ImageQt.ImageQt(self.im).copy()
             QtIm = QtGui.QImage(QtIm)
             pix = QtGui.QPixmap.fromImage(QtIm)
             self.image_container.setPixmap(pix)
+            #msg = QMessageBox.about(self,'Notice!',f"Cette image peut contenir jusqu'à {self.sizeMax()} caractère!")
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setWindowTitle("Notice")
+            msgBox.setText(f"Cette image peut contenir jusqu'à {self.sizeMax()} caractère!")
+            msgBox.exec()
+
             print(f"output is {self.output}")
         except Exception as e:
-            QMessageBox.about(self,'Erreur',f"Essayez avec une autre fichier")
+            print(e)
+            #QMessageBox.about(self,'Erreur',f"Essayez avec une autre fichier")
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Critical)
+            msgBox.setWindowTitle("Erreur")
+            msgBox.setText(f"Essayez avec une autre fichier!")
+            msgBox.exec()
             self.reset()
 
 
@@ -57,18 +78,39 @@ class Ui_Steganographie(QMainWindow):
         try:
             new_im = encode(self.text_container.toPlainText(),self.im,self.keyContainer.text())
             new_im.save(self.output)
-            QMessageBox.about(self,'Title',f"Message cachée dans {self.output}\n Clé de cryptage: {self.keyContainer.text()}")
-            self.reset()    
+            #QMessageBox.about(self,'',f"Message cachée dans {self.output}\n Clé de cryptage: {self.keyContainer.text()}")
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Warning)
+            msgBox.setWindowTitle("Succes")
+            msgBox.setText(f"Message cachée dans {self.output}\n Clé de cryptage: {self.keyContainer.text()}!")
+            msgBox.exec()
+            self.reset()  
+
         except Exception as e:
-            QMessageBox.about(self,'Erreur',f"Champ manquant")
+            print(e)
+            #QMessageBox.about(self,'Erreur',f"image manquante")
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Critical)
+            msgBox.setWindowTitle("Erreur")
+            msgBox.setText(f"Image manquante!")
+            msgBox.exec()
 
         
 
     def show(self):
         try:
-            QMessageBox.about(self ,"Contenue cachée",decode(self.im,self.keyContainer.text()))
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setWindowTitle("Contenue")
+            msgBox.setText(f"Resultat de l'extraction avec la clé: {self.keyContainer.text()} !")
+            msgBox.setDetailedText(f"{decode(self.im,self.keyContainer.text())}")
+            msgBox.exec()
         except Exception as e:
-            QMessageBox.about(self,'Erreur',f"Champ manquant")
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Critical)
+            msgBox.setWindowTitle("Erreur")
+            msgBox.setText(f"Image manquante!")
+            msgBox.exec()
 
         self.reset()
 
