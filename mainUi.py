@@ -120,6 +120,7 @@ class Ui_Steganographie(QMainWindow):
         Steganographie.resize(282, 579)
 
         self.image_container = QtWidgets.QLabel(Steganographie)
+        self.image_container.setScaledContents(True)
         self.image_container.setGeometry(QtCore.QRect(20, 50, 250, 250))
         self.image_container.setAutoFillBackground(True)
         self.image_container.setAlignment(QtCore.Qt.AlignCenter)

@@ -61,7 +61,7 @@ def encode(text,image,key=""):
     iteration = 0
    
     text = length+text
-    print(text)
+    print(len(text))
     
     for i in range(image.size[0]):
         for j in range(image.size[1]):
